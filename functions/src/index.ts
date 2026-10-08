@@ -1,5 +1,7 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onCall } from "firebase-functions/v2/https";
+
 import { db } from "./admin";
+import { getAuthenticatedTenantId } from "./auth";
 
 /**
  * Function de exemplo — só para você confirmar que o ambiente está rodando.
@@ -9,19 +11,10 @@ export const ping = onCall(() => {
 });
 
 /**
- * Lista os atendimentos de UM tenant.
- *
- * ATENÇÃO: esta função hoje recebe o tenantId diretamente no payload da
- * chamada, sem validar se quem está chamando de fato pertence a esse tenant.
- * Isso é proposital — faz parte do que os testes técnicos pedem para revisar,
- * dependendo do nível do teste que você recebeu.
+ * Lista os atendimentos do tenant do usuário autenticado.
  */
 export const listAtendimentos = onCall(async (request) => {
-  const tenantId = request.data?.tenantId;
-
-  if (!tenantId || typeof tenantId !== "string") {
-    throw new HttpsError("invalid-argument", "tenantId é obrigatório.");
-  }
+  const tenantId = getAuthenticatedTenantId(request);
 
   const snapshot = await db
     .collection("atendimentos")
@@ -29,20 +22,19 @@ export const listAtendimentos = onCall(async (request) => {
     .get();
 
   return {
-    atendimentos: snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+    atendimentos: snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })),
   };
 });
 
 /**
- * Cria um novo registro de atendimento para um tenant.
- * Implementação mínima — sem validação de schema.
+ * Cria um novo registro de atendimento para o tenant do usuário autenticado.
  */
 export const createAtendimento = onCall(async (request) => {
-  const { tenantId, transcricao, duracaoSegundos } = request.data ?? {};
-
-  if (!tenantId || typeof tenantId !== "string") {
-    throw new HttpsError("invalid-argument", "tenantId é obrigatório.");
-  }
+  const { transcricao, duracaoSegundos } = request.data ?? {};
+  const tenantId = getAuthenticatedTenantId(request);
 
   const doc = await db.collection("atendimentos").add({
     tenantId,
