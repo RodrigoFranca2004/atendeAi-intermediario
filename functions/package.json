@@ -11,7 +11,7 @@
     "build:watch": "tsc --watch",
     "seed": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 ts-node src/seed.ts",
     "seed:auth": "cross-env FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 ts-node src/seed-auth.ts",
-    "test": "cross-env FIRESTORE_EMULATOR_HOST=localhost:8080 jest --runInBand"
+    "test": "cross-env FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 jest --runInBand"
   },
   "dependencies": {
     "firebase-admin": "^12.6.0",
