@@ -1,9 +1,24 @@
 import { initializeApp } from "firebase/app";
-import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
+import {
+  getAuth,
+  connectAuthEmulator,
+} from "firebase/auth";
+import {
+  getFunctions,
+  connectFunctionsEmulator,
+} from "firebase/functions";
 
-const app = initializeApp({ projectId: "atendeai-teste-local" });
+const app = initializeApp({
+  apiKey: "fake-api-key",
+  authDomain: "atendeai-teste-local.firebaseapp.com",
+  projectId: "atendeai-teste-local",
+});
 
+export const auth = getAuth(app);
 export const functions = getFunctions(app);
 
-// Sempre conecta no emulador local — este projeto nunca fala com Firebase de produção.
+connectAuthEmulator(auth, "http://localhost:9099", {
+  disableWarnings: true,
+});
+
 connectFunctionsEmulator(functions, "localhost", 5001);
