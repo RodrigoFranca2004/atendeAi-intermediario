@@ -10,6 +10,7 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "seed": "cross-env FIRESTORE_EMULATOR_HOST=127.0.0.1:8080 ts-node src/seed.ts",
+    "seed:auth": "cross-env FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 ts-node src/seed-auth.ts",
     "test": "cross-env FIRESTORE_EMULATOR_HOST=localhost:8080 jest --runInBand"
   },
   "dependencies": {
