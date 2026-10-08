@@ -46,3 +46,41 @@ export const createAtendimento = onCall(async (request) => {
 
   return { id: doc.id };
 });
+
+/**
+ * Retorna a contagem de atendimentos por status do tenant do usuário autenticado.
+ *
+ * O tenantId é obtido exclusivamente do token de autenticação.
+ */
+export const resumoPorTenant = onCall(async (request) => {
+  const tenantId = getAuthenticatedTenantId(request);
+
+  const snapshot = await db
+    .collection("atendimentos")
+    .where("tenantId", "==", tenantId)
+    .get();
+
+  const resumo = {
+    novo: 0,
+    pendente: 0,
+    resolvido: 0,
+  };
+
+  snapshot.docs.forEach((doc) => {
+    const status = doc.data().status;
+
+    if (status === "novo") {
+      resumo.novo++;
+    }
+
+    if (status === "pendente") {
+      resumo.pendente++;
+    }
+
+    if (status === "resolvido") {
+      resumo.resolvido++;
+    }
+  });
+
+  return resumo;
+});
