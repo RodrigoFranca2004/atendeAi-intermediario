@@ -11,12 +11,12 @@ const usuarios = [
   {
     email: "usuario.a@atendeai.local",
     password: "123456",
-    tenantId: "tenant-a",
+    tenantId: "tenant-alfa",
   },
   {
     email: "usuario.b@atendeai.local",
     password: "123456",
-    tenantId: "tenant-b",
+    tenantId: "tenant-beta",
   },
 ];
 
