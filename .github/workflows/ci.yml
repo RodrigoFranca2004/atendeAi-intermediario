@@ -31,7 +31,7 @@ jobs:
       - run: npm run build
         working-directory: functions
 
-      - run: firebase emulators:exec --project atendeai-teste-local --only auth,firestore,functions "npm --prefix functions test"
+      - run: npm test
         working-directory: .
 
   web:

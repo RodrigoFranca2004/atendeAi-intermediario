@@ -1,0 +1,7 @@
+{
+  "name": "atendeai-teste-intermediario",
+  "private": true,
+  "scripts": {
+    "test": "firebase emulators:exec --project atendeai-teste-local --only auth,firestore,functions \"npm --prefix functions test\""
+  }
+}
