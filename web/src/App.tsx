@@ -17,6 +17,12 @@ type Atendimento = {
   duracaoSegundos: number;
 };
 
+type ResumoPorTenant = {
+  novo: number;
+  pendente: number;
+  resolvido: number;
+};
+
 const USUARIO_TESTE = {
   email: "usuario.a@atendeai.local",
   password: "123456",
@@ -25,9 +31,11 @@ const USUARIO_TESTE = {
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [atendimentos, setAtendimentos] = useState<Atendimento[]>([]);
-  const [carregando, setCarregando] = useState(false);
+  const [carregandoAtendimentos, setcarregandoAtendimentos] = useState(false);
   const [autenticando, setAutenticando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [resumo, setResumo] = useState<ResumoPorTenant | null>(null);
+  const [carregandoResumo, setCarregandoResumo] = useState(false);
 
   useEffect(() => {
     return onAuthStateChanged(auth, (currentUser) => {
@@ -59,10 +67,11 @@ export default function App() {
   async function sair() {
     await signOut(auth);
     setAtendimentos([]);
+    setResumo(null);
   }
 
-  async function carregar() {
-    setCarregando(true);
+  async function carregarAtendimento() {
+    setcarregandoAtendimentos(true);
     setErro(null);
 
     try {
@@ -83,7 +92,26 @@ export default function App() {
           : "Erro desconhecido"
       );
     } finally {
-      setCarregando(false);
+      setcarregandoAtendimentos(false);
+    }
+  }
+
+  async function carregarResumo() {
+    setCarregandoResumo(true);
+    setErro(null);
+
+    try {
+      const resumoPorTenant = httpsCallable<unknown, ResumoPorTenant>(
+        functions,
+        "resumoPorTenant"
+      );
+
+      const resp = await resumoPorTenant({});
+      setResumo(resp.data);
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao carregar resumo.");
+    } finally {
+      setCarregandoResumo(false);
     }
   }
 
@@ -131,13 +159,17 @@ export default function App() {
         Usuário autenticado: <code>{user.email}</code>
       </p>
 
-      <button onClick={carregar} disabled={carregando}>
-        {carregando
+      <button onClick={carregarAtendimento} disabled={carregandoAtendimentos}>
+        {carregandoAtendimentos
           ? "carregando..."
           : "carregar atendimentos"}
       </button>
 
       {" "}
+
+      <button onClick={carregarResumo} disabled={carregandoResumo}>
+        {carregandoResumo ? "consultando..." : "consultar resumo"}
+      </button>
       
       <button onClick={sair}>
         sair
@@ -147,6 +179,17 @@ export default function App() {
         <p style={{ color: "red" }}>
           {erro}
         </p>
+      )}
+
+      {resumo && (
+        <section>
+          <h2>Resumo de atendimentos</h2>
+          <ul>
+            <li>Novo: {resumo.novo}</li>
+            <li>Pendente: {resumo.pendente}</li>
+            <li>Resolvido: {resumo.resolvido}</li>
+          </ul>
+        </section>
       )}
 
       <ul>
